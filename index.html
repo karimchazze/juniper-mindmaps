@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juniper SP Track — Mind Maps</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f4f4f4;color:#222;padding:16px}
+h1{text-align:center;font-size:20px;margin-bottom:4px;color:#1a1a1a}
+.subtitle{text-align:center;font-size:12px;color:#777;margin-bottom:20px}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:6px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:8px 20px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.tab.active{color:#fff;border-color:transparent}
+.tab.t1.active{background:#185FA5}
+.tab.t2.active{background:#3B6D11}
+.tab.t3.active{background:#7B2D00}
+.tab:not(.active):hover{background:#f0f0f0}
+.page{display:none}.page.active{display:block}
+
+/* ── Section ── */
+.section{background:#fff;border-radius:12px;padding:18px;margin-bottom:0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.section-title{font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #eee}
+
+/* ── Grid ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+
+/* ── Card ── */
+.card{border-radius:8px;border:1px solid #ddd;overflow:hidden}
+.card-hdr{padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.card-hdr:hover{filter:brightness(.97)}
+.num{font-size:11px;font-weight:700;opacity:.6;min-width:20px}
+.name{font-size:13px;font-weight:700;flex:1}
+.arrow{font-size:11px;color:#aaa;transition:transform .2s;margin-left:4px}
+.card.open>.card-hdr .arrow{transform:rotate(90deg)}
+.card-body{display:none;background:#fff}
+.card.open>.card-body{display:block}
+
+/* ── Body sections ── */
+.body-concepts{padding:8px 12px 6px;border-top:1px solid #eee}
+.body-notes{padding:6px 12px 10px;border-top:1px dashed #e0e0e0;background:#fafaf8}
+
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.tag{padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.key{font-size:11px;color:#444;line-height:1.9;border-left:3px solid #ddd;padding-left:8px}
+.key b{color:#111;font-weight:700}
+
+/* ── Notes area ── */
+.notes-hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px;cursor:pointer}
+.notes-hdr span{font-size:11px;font-weight:700;color:#888}
+.notes-hdr .ni{font-size:10px;color:#aaa;transition:transform .2s}
+.notes-hdr.open .ni{transform:rotate(90deg)}
+.notes-content{display:none}
+.notes-hdr.open+.notes-content{display:block}
+.notes-textarea{width:100%;border:1px solid #ddd;border-radius:5px;padding:7px 9px;font-size:11px;font-family:Arial,sans-serif;resize:vertical;min-height:60px;color:#333;background:#fff;line-height:1.6}
+.notes-textarea:focus{outline:none;border-color:#999}
+.notes-textarea::placeholder{color:#bbb}
+.save-btn{margin-top:4px;padding:4px 12px;background:#555;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600}
+.save-btn:hover{background:#333}
+.saved-badge{font-size:10px;color:#3B6D11;margin-left:8px;opacity:0;transition:opacity .3s}
+
+/* ── Status ── */
+.status-row{display:flex;gap:6px;align-items:center;margin-top:6px}
+.status-row span{font-size:11px;color:#888}
+select.status-sel{font-size:11px;border:1px solid #ddd;border-radius:4px;padding:2px 6px;background:#fff;cursor:pointer}
+
+/* ── Colors per section ── */
+.jncia .section-title{color:#185FA5}
+.jncis .section-title{color:#3B6D11}
+.jncip .section-title{color:#7B2D00}
+
+.c1 .card-hdr{background:#e8f3fc}.c1 .tag{background:#85B7EB;color:#042C53}
+.c2 .card-hdr{background:#ecf5e2}.c2 .tag{background:#97C459;color:#173404}
+.c3 .card-hdr{background:#fdf0dc}.c3 .tag{background:#EF9F27;color:#412402}
+.c4 .card-hdr{background:#f0effd}.c4 .tag{background:#AFA9EC;color:#26215C}
+.c5 .card-hdr{background:#fceee8}.c5 .tag{background:#F09975;color:#4A1B0C}
+.c6 .card-hdr{background:#e4f8f2}.c6 .tag{background:#5DCAA5;color:#04342C}
+.c7 .card-hdr{background:#fcedf3}.c7 .tag{background:#ED93B1;color:#4B1528}
+.c8 .card-hdr{background:#f2f0e9}.c8 .tag{background:#B4B2A9;color:#2C2C2A}
+.c9 .card-hdr{background:#e8f3fc}.c9 .tag{background:#85B7EB;color:#042C53}
+.c10 .card-hdr{background:#ecf5e2}.c10 .tag{background:#97C459;color:#173404}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.toolbar button{padding:6px 14px;border:1px solid #ccc;background:#fff;border-radius:5px;font-size:11px;cursor:pointer}
+.toolbar button:hover{background:#f0f0f0}
+.legend{text-align:center;font-size:10px;color:#aaa;margin-top:10px}
+.noprint{margin-bottom:14px;text-align:center}
+.noprint button{padding:8px 20px;background:#185FA5;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600}
+.noprint button:hover{background:#0C447C}
+@media print{.noprint,.tabs,.toolbar{display:none!important}.page{display:block!important}.section{break-inside:avoid;box-shadow:none}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<div class="noprint"><button onclick="window.print()">Imprimer / PDF</button></div>
+<h1>Juniper SP Track — Mind Maps</h1>
+<div class="subtitle">JNCIA · JNCIS-SP · JNCIP-SP — Notes personnelles sauvegardées automatiquement</div>
+
+<div class="tabs">
+  <div class="tab t1 active" onclick="showPage('jncia',this)">JNCIA-Junos</div>
+  <div class="tab t2" onclick="showPage('jncis',this)">JNCIS-SP</div>
+  <div class="tab t3" onclick="showPage('jncip',this)">JNCIP-SP</div>
+</div>
+
+<div class="toolbar">
+  <button onclick="openAll()">Tout ouvrir</button>
+  <button onclick="closeAll()">Tout fermer</button>
+  <button onclick="exportNotes()">Exporter mes notes (TXT)</button>
+</div>
+
+<!-- ═══ JNCIA ═══ -->
+<div id="page-jncia" class="page active">
+<div class="section jncia">
+<div class="section-title">JNCIA-Junos (JN0-105) — 7 modules officiels</div>
+<div class="grid" id="grid-jncia">
+
+<div class="card c1" id="jncia-1">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">01</span><span class="name">Networking Fundamentals</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Collision/Broadcast domain</span><span class="tag">ARP</span><span class="tag">Subnetting</span><span class="tag">IPv4/IPv6</span><span class="tag">Longest match</span><span class="tag">CoS</span></div>
+      <div class="key"><b>Collision domain</b> → hub partagé — switch = 1 par port<br><b>Broadcast domain</b> → délimité par routeur / VLAN<br><b>ARP</b> → IP→MAC, broadcast request → unicast reply<br><b>Subnetting</b> → bloc = 256 - masque (/27 = blocs de 32)<br><b>Longest match</b> → /32 &gt; /24 &gt; /0 — route la plus spécifique gagne<br><b>CO vs CO</b> → TCP=connection-oriented / UDP=connectionless</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content">
+        <textarea class="notes-textarea" placeholder="Ajoute tes notes, exemples, commandes, astuces..."></textarea>
+        <button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span>
+        <div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card c2" id="jncia-2">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">02</span><span class="name">Junos OS Fundamentals</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">RE / PFE</span><span class="tag">Control plane</span><span class="tag">Forwarding plane</span><span class="tag">Transit / Exception traffic</span></div>
+      <div class="key"><b>RE</b> → Routing Engine — calcul routes, CLI, protocoles<br><b>PFE</b> → Packet Forwarding Engine — forwarding haute vitesse<br><b>Transit</b> → passe par PFE (forwarding normal IP)<br><b>Exception</b> → va au RE (TTL=1, routing protocols, ICMP errors)<br><b>Séparation RE/PFE</b> → stabilité — panne RE n'interrompt pas le forwarding</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card c3" id="jncia-3">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">03</span><span class="name">User Interfaces</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">CLI modes</span><span class="tag">Raccourcis clavier</span><span class="tag">Candidate config</span><span class="tag">Commit options</span><span class="tag">Rollback</span><span class="tag">J-Web tabs</span></div>
+      <div class="key"><b>Raccourcis</b> → Ctrl+A début | Ctrl+E fin | Ctrl+U efface tout | Ctrl+W mot<br><b>configure private</b> → config isolée par user (chacun sa candidate)<br><b>configure exclusive</b> → lock pour moi seul (autres bloqués)<br><b>commit confirmed X</b> → rollback auto si pas confirm dans X minutes<br><b>rollback N</b> → revient à la Nème config (max 50)<br><b>J-Web Maintain</b> → licences, upgrade, reboot<br><b>top show</b> → depuis un contexte edit, remonte au root puis show</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card c4" id="jncia-4">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">04</span><span class="name">Configuration Basics</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">load merge/override/patch/set</span><span class="tag">rename/copy</span><span class="tag">Login classes</span><span class="tag">Auth order</span><span class="tag">Rescue config</span></div>
+      <div class="key"><b>load override</b> → remplace toute la config<br><b>load merge</b> → fusionne avec l'existante<br><b>rename</b> → modifie un élément existant (ex: changer une IP)<br><b>copy</b> → copie un élément (les deux coexistent)<br><b>4 login classes</b> → super-user / operator / read-only / unauthorized<br><b>Auth order</b> → TACACS→RADIUS→local (last resort si timeout serveurs)<br><b>rescue save</b> → sauvegarde la config active comme rescue</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card c5" id="jncia-5">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">05</span><span class="name">Operational Monitoring</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">show commands</span><span class="tag">ping options</span><span class="tag">traceroute</span><span class="tag">Interface stats</span><span class="tag">OS upgrade</span></div>
+      <div class="key"><b>show route</b> → * = route active (utilisée pour forwarder)<br><b>show interfaces terse</b> → résumé rapide<br><b>ping bypass-routing</b> → ignore routing table, sort par interface<br><b>ping rapid count 1000</b> → test de charge<br><b>monitor interface ge-0/0/0</b> → stats temps réel<br><b>request system software add</b> → upgrade JunOS</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card c6" id="jncia-6">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">06</span><span class="name">Routing Fundamentals</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">RIB / FIB</span><span class="tag">Route preference</span><span class="tag">Static routes</span><span class="tag">reject vs discard</span><span class="tag">Routing instances</span></div>
+      <div class="key"><b>Preference</b> → Direct=0, Static=5, OSPF=10, IS-IS=15, BGP=170<br><b>reject</b> → jette + envoie ICMP unreachable à la SOURCE<br><b>discard</b> → jette silencieusement (blackhole — pas d'ICMP)<br><b>Floating static</b> → haute preference = backup dynamique<br><b>inet.0</b> → table de routage principale IPv4<br><b>inet.6.0</b> → table IPv6</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card c7" id="jncia-7">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">07</span><span class="name">Routing Policy &amp; Firewall Filters</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Import/Export</span><span class="tag">Terms from/then</span><span class="tag">route-filter types</span><span class="tag">Default policies</span><span class="tag">Terminating/Modifiers</span><span class="tag">Default actions</span></div>
+      <div class="key"><b>Default export</b> → BGP=accept all | OSPF/IS-IS/RIP/Static=reject all<br><b>exact</b> → ce préfixe seulement | <b>longer</b> → plus spécifique seulement | <b>orlonger</b> → égal ou plus spécifique<br><b>next policy</b> → passe à la policy suivante (routing policy uniquement)<br><b>Terminating</b> → accept / discard / reject (STOP)<br><b>Modifiers</b> → count / log / syslog / policer / forwarding-class<br><b>Filter default</b> → match sans action=ACCEPT | aucun match=DISCARD<br><b>Policy default</b> → match sans action=ACCEPT | aucun match=ACCEPT</div>
+    </div>
+    <div class="body-notes">
+      <div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div>
+      <div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="legend">Source : PDF officiel Juniper JNCIA-Junos (JN0-105) — Jan 2024</div>
+</div>
+</div>
+
+<!-- ═══ JNCIS-SP ═══ -->
+<div id="page-jncis" class="page">
+<div class="section jncis">
+<div class="section-title">JNCIS-SP (JN0-363) — 10 modules officiels</div>
+<div class="grid" id="grid-jncis">
+
+<div class="card c1" id="jncis-1">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">01</span><span class="name">Protocol-Independent Routing</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Static/Aggregate/Generated</span><span class="tag">Martian addresses</span><span class="tag">RIB groups</span><span class="tag">Load balancing</span><span class="tag">Filter-based forwarding</span></div>
+      <div class="key"><b>Aggregate</b> → résume plusieurs routes (contributing routes)<br><b>Generated</b> → créée si contributing route existe dans RIB<br><b>Martian</b> → adresses ignorées par défaut (0.0.0.0, 127.x, 224.x...)<br><b>RIB group</b> → copie routes entre tables de routage<br><b>Filter-based forwarding</b> → route selon firewall filter (policy routing)</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c2" id="jncis-2">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">02</span><span class="name">OSPF</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">LSDB</span><span class="tag">5 packet types</span><span class="tag">DR/BDR election</span><span class="tag">Area types</span><span class="tag">LSA types</span><span class="tag">Adjacency states</span></div>
+      <div class="key"><b>5 paquets</b> → Hello / DBD / LSR / LSU / LSAck<br><b>DR/BDR</b> → priorité (défaut 128) puis Router ID — sur broadcast uniquement<br><b>LSA 1</b>=Router | <b>2</b>=Network | <b>3</b>=Summary | <b>5</b>=External | <b>7</b>=NSSA<br><b>Adjacency</b> → Down→Init→2-Way→ExStart→Exchange→Loading→Full<br><b>Areas</b> → 0=backbone, stub, NSSA, totally stub, totally NSSA</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Config, show commands, astuces..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c3" id="jncis-3">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">03</span><span class="name">IS-IS</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">PDUs</span><span class="tag">TLVs</span><span class="tag">Level 1 / Level 2</span><span class="tag">DIS</span><span class="tag">NET address</span><span class="tag">Wide metrics</span></div>
+      <div class="key"><b>Levels</b> → L1=intra-area | L2=inter-area | L1/L2=les deux<br><b>NET</b> → 49.0001.1921.6800.1001.00 (Area.SystemID.00)<br><b>DIS</b> → Designated IS — élu sur priorité puis MAC<br><b>Wide metric</b> → jusqu'à 16,777,215 (narrow max=63)<br><b>Avantage SP</b> → plus scalable qu'OSPF, pas d'areas complexes</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c4" id="jncis-4">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">04</span><span class="name">BGP</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">eBGP/iBGP</span><span class="tag">4 messages</span><span class="tag">Attributs</span><span class="tag">Path selection</span><span class="tag">Route reflector</span><span class="tag">Policies</span></div>
+      <div class="key"><b>4 messages</b> → OPEN / UPDATE / NOTIFICATION / KEEPALIVE<br><b>Sélection</b> → LOCAL_PREF↑ → AS_PATH↓ → MED↓ → eBGP&gt;iBGP → IGP metric↓<br><b>Route reflector</b> → évite full-mesh iBGP — RR reflète aux clients<br><b>Import</b> → filtre routes reçues dans RIB<br><b>Export</b> → filtre routes annoncées aux voisins</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c5" id="jncis-5">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">05</span><span class="name">Layer 2 Bridging / VLANs</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">MAC learning</span><span class="tag">Q-in-Q (802.1ad)</span><span class="tag">IRB</span><span class="tag">Virtual switch</span><span class="tag">Port modes</span></div>
+      <div class="key"><b>Q-in-Q</b> → double tag : S-tag (outer 0x88a8) + C-tag (inner 0x8100)<br><b>IRB</b> → Integrated Routing and Bridging — interface L3 sur VLAN<br><b>Virtual switch</b> → instance bridging isolée sur Junos EX/MX<br><b>Port modes</b> → access (1 VLAN) / trunk (plusieurs VLANs tagués)</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c6" id="jncis-6">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">06</span><span class="name">Spanning Tree Protocols</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">STP/RSTP/MSTP/VSTP</span><span class="tag">Port roles</span><span class="tag">BPDUs</span><span class="tag">BPDU/Root guard</span></div>
+      <div class="key"><b>Rôles</b> → Root / Designated / Alternate / Backup<br><b>États RSTP</b> → Discarding / Learning / Forwarding<br><b>Root bridge</b> → plus petite BID (priorité 32768 défaut + MAC)<br><b>BPDU guard</b> → désactive port si BPDU reçu (edge ports)<br><b>Root guard</b> → empêche un port de devenir root port</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c7" id="jncis-7">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">07</span><span class="name">MPLS</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Labels</span><span class="tag">LDP</span><span class="tag">RSVP</span><span class="tag">Push/Pop/Swap</span><span class="tag">inet.3</span><span class="tag">PHP</span><span class="tag">Segment Routing</span></div>
+      <div class="key"><b>Label</b> → 20 bits label | 3 bits TC | 1 bit S (bottom of stack) | 8 bits TTL<br><b>LDP</b> → distribue labels basé sur IGP, hop-by-hop<br><b>RSVP</b> → LSP avec réservation bande passante, path explicite<br><b>inet.3</b> → table des LSPs (utilisée par BGP pour résoudre NEXT_HOP)<br><b>PHP</b> → Penultimate Hop Popping — avant-dernier router enlève le label<br><b>SR</b> → Segment Routing — SID remplace labels LDP/RSVP</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c8" id="jncis-8">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">08</span><span class="name">IPv6</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">128 bits</span><span class="tag">NDP</span><span class="tag">SLAAC</span><span class="tag">OSPFv3</span><span class="tag">IS-IS dual-stack</span><span class="tag">Tunneling</span></div>
+      <div class="key"><b>Link-local</b> → FE80::/10 — auto-configurée, non routable<br><b>NDP</b> → Neighbor Discovery Protocol (remplace ARP)<br><b>SLAAC</b> → auto-config sans DHCP (prefix /64 + EUI-64)<br><b>Tunneling</b> → 6in4, 6to4, GRE IPv6-over-IPv4</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c9" id="jncis-9">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">09</span><span class="name">Tunnels (GRE)</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">GRE IP Protocol 47</span><span class="tag">Encapsulation</span><span class="tag">MTU overhead 24B</span><span class="tag">gr- interface</span></div>
+      <div class="key"><b>GRE</b> → Outer IP Header + GRE Header (4B) + Original Packet<br><b>MTU</b> → overhead = 24 bytes (attention fragmentation)<br><b>Config</b> → interfaces gr-0/0/0.0 { tunnel { source X; destination Y } }<br><b>Usage</b> → transporter non-IP, bypass restrictions, VPN basique</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c10" id="jncis-10">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">10</span><span class="name">High Availability</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">LAG/MC-LAG</span><span class="tag">GRES</span><span class="tag">NSR/NSB</span><span class="tag">BFD</span><span class="tag">VRRP</span><span class="tag">Unified ISSU</span><span class="tag">Graceful restart</span></div>
+      <div class="key"><b>GRES</b> → bascule RE sans perdre forwarding states (PFE continue)<br><b>NSR</b> → protocoles continuent sans reconvergence après bascule RE<br><b>BFD</b> → détection panne en ms (remplace timers lents OSPF/BGP)<br><b>VRRP</b> → passerelle redondante — Master + Backup + Virtual IP<br><b>Unified ISSU</b> → upgrade software sans interruption de trafic</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+</div>
+<div class="legend">Source : PDF officiel Juniper JNCIS-SP (JN0-363) — May 2022</div>
+</div>
+</div>
+
+<!-- ═══ JNCIP-SP ═══ -->
+<div id="page-jncip" class="page">
+<div class="section jncip">
+<div class="section-title">JNCIP-SP (JN0-663) — 8 modules officiels</div>
+<div class="grid" id="grid-jncip">
+
+<div class="card c1" id="jncip-1">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">01</span><span class="name">OSPF Advanced</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">OSPFv2/v3</span><span class="tag">Multi-area</span><span class="tag">Summarization</span><span class="tag">Virtual links</span><span class="tag">TE extensions</span><span class="tag">Redistribution</span></div>
+      <div class="key"><b>OSPFv3</b> → OSPF pour IPv6, mêmes mécanismes, nouveaux TLVs<br><b>area-range</b> → summarisation inter-area sur ABR<br><b>Virtual link</b> → connecte area non-contiguë au backbone area 0<br><b>TE extensions</b> → Opaque LSA type 9/10/11 pour MPLS-TE<br><b>Redistribution</b> → external routes → LSA type 5 (ou type 7 en NSSA)</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c2" id="jncip-2">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">02</span><span class="name">IS-IS Advanced</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Route leaking L2→L1</span><span class="tag">TE extensions TLV 22</span><span class="tag">Wide metrics</span><span class="tag">Multi-topology</span></div>
+      <div class="key"><b>Route leaking</b> → fait passer routes L2→L1 (non-default)<br><b>TLV 22</b> → Extended IS Reachability pour MPLS-TE<br><b>Wide metrics</b> → jusqu'à 16,777,215<br><b>MT IS-IS</b> → topologies séparées IPv4 et IPv6</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c3" id="jncip-3">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">03</span><span class="name">BGP Advanced</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Route reflector</span><span class="tag">Confederation</span><span class="tag">Communities</span><span class="tag">Dampening</span><span class="tag">Add-path</span></div>
+      <div class="key"><b>RR</b> → évite full-mesh iBGP (ORIGINATOR_ID + CLUSTER_LIST pour loops)<br><b>no-export</b> → ne pas annoncer hors AS<br><b>no-advertise</b> → ne pas annoncer à aucun voisin BGP<br><b>Dampening</b> → pénalise routes instables (half-life, suppress, reuse)<br><b>Add-path</b> → annonce plusieurs chemins BGP (multipath)</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c4" id="jncip-4">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">04</span><span class="name">Class of Service (CoS)</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">Classify→Queue→Schedule→Rewrite</span><span class="tag">BA/MF classifier</span><span class="tag">DSCP/EXP</span><span class="tag">Scheduler</span><span class="tag">Policer</span></div>
+      <div class="key"><b>Pipeline</b> → Classify → Queue → Schedule → Rewrite<br><b>BA classifier</b> → lit DSCP (IP) ou EXP (MPLS label) → forwarding-class<br><b>MF classifier</b> → firewall filter → forwarding-class + loss-priority<br><b>4 queues défaut</b> → best-effort / expedited-forwarding / assured-forwarding / network-control<br><b>Policer</b> → token bucket — rate limit en bps, then discard ou mark</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c5" id="jncip-5">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">05</span><span class="name">IP Multicast</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">224.0.0.0/4</span><span class="tag">IGMP</span><span class="tag">PIM-DM/SM</span><span class="tag">SSM 232/8</span><span class="tag">RPT/SPT</span><span class="tag">RP discovery</span></div>
+      <div class="key"><b>PIM-DM</b> → flood &amp; prune (dense, petits réseaux)<br><b>PIM-SM</b> → RP centralise → RPT (shared tree) puis SPT switchover<br><b>SSM</b> → 232.0.0.0/8 — pas de RP, source spécifique (S,G)<br><b>RP discovery</b> → statique / Auto-RP / BSR (Bootstrap Router)<br><b>IGMP v2</b> → (*,G) join | <b>IGMP v3</b> → (S,G) join</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c6" id="jncip-6">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">06</span><span class="name">MPLS Advanced</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">RSVP-TE</span><span class="tag">CSPF</span><span class="tag">Fast Reroute</span><span class="tag">Auto-bandwidth</span><span class="tag">LSP OAM</span></div>
+      <div class="key"><b>RSVP-TE</b> → LSP avec contraintes (BW, admin-groups, path explicite)<br><b>CSPF</b> → Constrained Shortest Path First — calcule selon contraintes<br><b>FRR link</b> → bypass sur lien voisin (&lt;50ms) | <b>FRR node</b> → bypass un noeud entier<br><b>ping mpls / traceroute mpls</b> → OAM du LSP<br><b>Auto-bandwidth</b> → ajuste BW RSVP selon trafic réel</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c7" id="jncip-7">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">07</span><span class="name">Layer 3 VPNs</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">VRF</span><span class="tag">RD</span><span class="tag">RT import/export</span><span class="tag">MP-BGP</span><span class="tag">CE-PE-P-PE-CE</span><span class="tag">Inter-AS A/B/C</span></div>
+      <div class="key"><b>VRF</b> → table routage isolée par client sur le PE<br><b>RD</b> → Route Distinguisher — rend les VPN routes uniques (8 bytes)<br><b>RT</b> → Route Target — contrôle import/export entre VRFs<br><b>MP-BGP</b> → transporte VPN routes avec labels MPLS (VPNv4)<br><b>Inter-AS A</b> → VRF-to-VRF | <b>B</b> → ASBR échange labels | <b>C</b> → multi-hop eBGP</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+<div class="card c8" id="jncip-8">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">08</span><span class="name">Layer 2 VPNs</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">L2 Circuit (LDP)</span><span class="tag">BGP L2VPN</span><span class="tag">VPLS LDP/BGP</span><span class="tag">Pseudowire</span><span class="tag">E-Line/E-LAN</span></div>
+      <div class="key"><b>L2 Circuit LDP</b> → point à point (E-Line) — signalé par LDP<br><b>BGP L2VPN</b> → point à point (E-Line) — signalé par BGP<br><b>VPLS</b> → multipoint (E-LAN) — mesh de pseudowires entre PEs<br><b>BGP VPLS</b> → autodiscovery BGP — plus scalable que LDP VPLS<br><b>vs L3VPN</b> → L2=transparence Ethernet / L3=routage entre sites</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+</div>
+<div class="legend">Source : objectifs officiels Juniper JNCIP-SP (JN0-663)</div>
+</div>
+</div>
+
+<div style="text-align:center;color:#aaa;font-size:11px;padding:12px 0 4px">Karim Chaouali — Juniper SP Track — Notes sauvegardées dans le navigateur</div>
+
+<script>
+const PREFIX = 'juniper_mindmap_';
+
+function showPage(name, tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  tab.classList.add('active');
+}
+
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+
+function toggleNotes(hdr) {
+  hdr.classList.toggle('open');
+}
+
+function getCardId(btn) {
+  return btn.closest('.card').id;
+}
+
+function saveNote(btn) {
+  const id = getCardId(btn);
+  const ta = btn.previousElementSibling ? btn.parentElement.querySelector('textarea') : btn.closest('.notes-content').querySelector('textarea');
+  const val = btn.closest('.notes-content').querySelector('textarea').value;
+  localStorage.setItem(PREFIX + id + '_note', val);
+  const badge = btn.nextElementSibling;
+  badge.style.opacity = '1';
+  setTimeout(() => badge.style.opacity = '0', 2000);
+}
+
+function saveStatus(sel) {
+  const id = getCardId(sel);
+  localStorage.setItem(PREFIX + id + '_status', sel.value);
+}
+
+function loadAll() {
+  document.querySelectorAll('.card[id]').forEach(card => {
+    const id = card.id;
+    const note = localStorage.getItem(PREFIX + id + '_note');
+    const status = localStorage.getItem(PREFIX + id + '_status');
+    if (note) {
+      const ta = card.querySelector('textarea');
+      if (ta) ta.value = note;
+    }
+    if (status) {
+      const sel = card.querySelector('.status-sel');
+      if (sel) sel.value = status;
+    }
+  });
+}
+
+function openAll() {
+  const activePage = document.querySelector('.page.active');
+  activePage.querySelectorAll('.card').forEach(c => c.classList.add('open'));
+}
+
+function closeAll() {
+  const activePage = document.querySelector('.page.active');
+  activePage.querySelectorAll('.card').forEach(c => c.classList.remove('open'));
+}
+
+function exportNotes() {
+  let txt = 'JUNIPER SP TRACK — MES NOTES\n';
+  txt += '================================\n\n';
+  ['jncia','jncis','jncip'].forEach(cert => {
+    const page = document.getElementById('page-' + cert);
+    const title = page.querySelector('.section-title').textContent;
+    txt += '=== ' + title + ' ===\n\n';
+    page.querySelectorAll('.card[id]').forEach(card => {
+      const name = card.querySelector('.name').textContent;
+      const status = card.querySelector('.status-sel')?.value || '';
+      const note = card.querySelector('textarea')?.value || '';
+      if (note.trim()) {
+        txt += '--- ' + name + ' [' + (status||'non commencé') + '] ---\n';
+        txt += note.trim() + '\n\n';
+      }
+    });
+  });
+  const blob = new Blob([txt], {type: 'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'juniper_mes_notes.txt';
+  a.click();
+}
+
+loadAll();
+</script>
+</body>
+</html>
