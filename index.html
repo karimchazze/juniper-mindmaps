@@ -98,7 +98,7 @@ select.status-sel{font-size:11px;border:1px solid #ddd;border-radius:4px;padding
 
 <div class="noprint"><button onclick="window.print()">Imprimer / PDF</button></div>
 <h1>Juniper SP Track — Mind Maps</h1>
-<div class="subtitle">JNCIA · JNCIS-SP · JNCIP-SP — Notes personnelles sauvegardées automatiquement</div>
+<div class="subtitle">JNCIA · JNCIS-SP · JNCIP-SP — Notes personnelles sauvegardées dans le navigateur</div>
 
 <div class="tabs">
   <div class="tab t1 active" onclick="showPage('jncia',this)">JNCIA-Junos</div>
@@ -228,121 +228,166 @@ select.status-sel{font-size:11px;border:1px solid #ddd;border-radius:4px;padding
 <!-- ═══ JNCIS-SP ═══ -->
 <div id="page-jncis" class="page">
 <div class="section jncis">
-<div class="section-title">JNCIS-SP (JN0-363) — 10 modules officiels</div>
+<div class="section-title">JNCIS-SP (JN0-364 focus) — version enrichie SP</div>
 <div class="grid" id="grid-jncis">
 
 <div class="card c1" id="jncis-1">
   <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">01</span><span class="name">Protocol-Independent Routing</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">Static/Aggregate/Generated</span><span class="tag">Martian addresses</span><span class="tag">RIB groups</span><span class="tag">Load balancing</span><span class="tag">Filter-based forwarding</span></div>
-      <div class="key"><b>Aggregate</b> → résume plusieurs routes (contributing routes)<br><b>Generated</b> → créée si contributing route existe dans RIB<br><b>Martian</b> → adresses ignorées par défaut (0.0.0.0, 127.x, 224.x...)<br><b>RIB group</b> → copie routes entre tables de routage<br><b>Filter-based forwarding</b> → route selon firewall filter (policy routing)</div>
+      <div class="tags"><span class="tag">Static routes</span><span class="tag">Aggregate / Generated</span><span class="tag">Martian</span><span class="tag">RIB groups</span><span class="tag">Load balancing</span><span class="tag">FBF</span></div>
+      <div class="key"><b>Static route</b> → route manuelle ; preference Junos par défaut = 5<br><b>Resolve</b> → autorise recursive lookup pour next-hop non directement connecté<br><b>Aggregate</b> → résumé basé sur contributing routes ; route active si au moins une contribution existe<br><b>Generated</b> → similaire aggregate mais next-hop hérité d’une contributing route<br><b>Martian</b> → préfixes considérés invalides/ignorés par défaut<br><b>RIB group</b> → copie des routes entre tables, souvent inet.0 ↔ VRF/inet.3 selon design<br><b>Load balancing</b> → multipath nécessite policy then load-balance per-packet ; en pratique ECMP hash par flow<br><b>FBF</b> → firewall filter qui force un next-hop/routing-instance selon critères trafic</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c2" id="jncis-2">
   <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">02</span><span class="name">OSPF</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">LSDB</span><span class="tag">5 packet types</span><span class="tag">DR/BDR election</span><span class="tag">Area types</span><span class="tag">LSA types</span><span class="tag">Adjacency states</span></div>
-      <div class="key"><b>5 paquets</b> → Hello / DBD / LSR / LSU / LSAck<br><b>DR/BDR</b> → priorité (défaut 128) puis Router ID — sur broadcast uniquement<br><b>LSA 1</b>=Router | <b>2</b>=Network | <b>3</b>=Summary | <b>5</b>=External | <b>7</b>=NSSA<br><b>Adjacency</b> → Down→Init→2-Way→ExStart→Exchange→Loading→Full<br><b>Areas</b> → 0=backbone, stub, NSSA, totally stub, totally NSSA</div>
+      <div class="tags"><span class="tag">Hello/DBD/LSR/LSU/LSAck</span><span class="tag">DR/BDR</span><span class="tag">LSA 1/2/3/4/5/7</span><span class="tag">Area types</span><span class="tag">Adjacency states</span><span class="tag">Troubleshooting</span></div>
+      <div class="key"><b>5 paquets</b> → Hello découvre ; DBD résume LSDB ; LSR demande ; LSU envoie ; LSAck confirme<br><b>States</b> → Down → Init → 2-Way → ExStart → Exchange → Loading → Full<br><b>DR/BDR</b> → broadcast/NBMA uniquement ; élection priority puis Router-ID ; réduit flooding local<br><b>LSA</b> → 1 Router, 2 Network, 3 Summary, 4 ASBR Summary, 5 External, 7 NSSA External<br><b>Areas</b> → Area 0 backbone ; Stub bloque LSA5 ; Totally Stub garde surtout 1/2 + default ; NSSA remplace 5 par 7<br><b>Pièges</b> → MTU mismatch = ExStart/Exchange ; area mismatch = pas d’adjacence ; Full↔Down = flap/hellos perdus<br><b>Junos</b> → OSPF TE non activé par défaut : set protocols ospf traffic-engineering</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Config, show commands, astuces..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c3" id="jncis-3">
   <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">03</span><span class="name">IS-IS</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">PDUs</span><span class="tag">TLVs</span><span class="tag">Level 1 / Level 2</span><span class="tag">DIS</span><span class="tag">NET address</span><span class="tag">Wide metrics</span></div>
-      <div class="key"><b>Levels</b> → L1=intra-area | L2=inter-area | L1/L2=les deux<br><b>NET</b> → 49.0001.1921.6800.1001.00 (Area.SystemID.00)<br><b>DIS</b> → Designated IS — élu sur priorité puis MAC<br><b>Wide metric</b> → jusqu'à 16,777,215 (narrow max=63)<br><b>Avantage SP</b> → plus scalable qu'OSPF, pas d'areas complexes</div>
+      <div class="tags"><span class="tag">L1/L2</span><span class="tag">NET / System-ID</span><span class="tag">PDUs</span><span class="tag">TLVs</span><span class="tag">DIS</span><span class="tag">Wide metrics</span><span class="tag">TE extensions</span></div>
+      <div class="key"><b>Levels</b> → L1 intra-area ; L2 backbone/inter-area ; L1/L2 relie les deux<br><b>NET</b> → Area.System-ID.NSEL ; exemple 49.0001.1921.6800.1001.00<br><b>PDUs</b> → IIH hello ; LSP database ; CSNP résumé complet ; PSNP demande/ack partiel<br><b>TLV</b> → Type-Length-Value ; rend IS-IS extensible IPv4/IPv6/TE/SR<br><b>DIS</b> → équivalent DR sur LAN, élu par priorité puis MAC ; pas de BDR<br><b>Wide metrics</b> → nécessaires pour TE moderne ; narrow metric max 63<br><b>SP mindset</b> → pas dépendant d’IP pour neighbor ; très scalable ; TE extensions généralement natives/actives en Junos<br><b>Piège</b> → LSP IS-IS = paquet LSDB, pas MPLS LSP</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c4" id="jncis-4">
   <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">04</span><span class="name">BGP</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">eBGP/iBGP</span><span class="tag">4 messages</span><span class="tag">Attributs</span><span class="tag">Path selection</span><span class="tag">Route reflector</span><span class="tag">Policies</span></div>
-      <div class="key"><b>4 messages</b> → OPEN / UPDATE / NOTIFICATION / KEEPALIVE<br><b>Sélection</b> → LOCAL_PREF↑ → AS_PATH↓ → MED↓ → eBGP&gt;iBGP → IGP metric↓<br><b>Route reflector</b> → évite full-mesh iBGP — RR reflète aux clients<br><b>Import</b> → filtre routes reçues dans RIB<br><b>Export</b> → filtre routes annoncées aux voisins</div>
+      <div class="tags"><span class="tag">eBGP / iBGP</span><span class="tag">OPEN UPDATE KEEPALIVE NOTIFICATION</span><span class="tag">Attributes</span><span class="tag">Best path</span><span class="tag">RR</span><span class="tag">Policies</span></div>
+      <div class="key"><b>Messages</b> → OPEN établit ; UPDATE annonce/retire ; KEEPALIVE maintient ; NOTIFICATION ferme sur erreur<br><b>eBGP vs iBGP</b> → eBGP change AS_PATH et NEXT_HOP ; iBGP garde souvent NEXT_HOP sauf next-hop-self<br><b>Règle iBGP</b> → une route apprise iBGP n’est pas réannoncée à un autre iBGP sauf Route Reflector<br><b>Best path simplifié</b> → LOCAL_PREF↑ → AS_PATH↓ → ORIGIN → MED↓ → eBGP &gt; iBGP → IGP metric↓<br><b>RR</b> → évite full-mesh ; client/non-client ; ajoute ORIGINATOR_ID / CLUSTER_LIST anti-loop<br><b>Policies</b> → import filtre ce qu’on accepte ; export filtre ce qu’on annonce<br><b>SP</b> → MP-BGP transporte VPNv4/VPNv6/EVPN ; BGP = control-plane, pas transport dataplane seul</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c5" id="jncis-5">
   <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">05</span><span class="name">Layer 2 Bridging / VLANs</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">MAC learning</span><span class="tag">Q-in-Q (802.1ad)</span><span class="tag">IRB</span><span class="tag">Virtual switch</span><span class="tag">Port modes</span></div>
-      <div class="key"><b>Q-in-Q</b> → double tag : S-tag (outer 0x88a8) + C-tag (inner 0x8100)<br><b>IRB</b> → Integrated Routing and Bridging — interface L3 sur VLAN<br><b>Virtual switch</b> → instance bridging isolée sur Junos EX/MX<br><b>Port modes</b> → access (1 VLAN) / trunk (plusieurs VLANs tagués)</div>
+      <div class="tags"><span class="tag">MAC learning</span><span class="tag">Access / Trunk</span><span class="tag">Q-in-Q</span><span class="tag">IRB</span><span class="tag">Virtual switch</span><span class="tag">VLAN rewrite</span></div>
+      <div class="key"><b>Bridge table</b> → apprend MAC source ; forward selon MAC destination ; unknown unicast flood dans VLAN<br><b>Access</b> → untagged vers un seul VLAN ; <b>Trunk</b> → plusieurs VLAN tagués 802.1Q<br><b>Q-in-Q</b> → S-tag provider outer + C-tag client inner ; évite conflits VLAN entre clients<br><b>IRB</b> → passerelle L3 d’un VLAN/bridge-domain ; route entre VLANs<br><b>Virtual switch</b> → instance L2 isolée ; utile pour services provider/tenant<br><b>Piège</b> → L2 transparent ≠ L3VPN ; pour extension Ethernet penser Q-in-Q, VPLS ou EVPN selon contexte</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c6" id="jncis-6">
   <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">06</span><span class="name">Spanning Tree Protocols</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">STP/RSTP/MSTP/VSTP</span><span class="tag">Port roles</span><span class="tag">BPDUs</span><span class="tag">BPDU/Root guard</span></div>
-      <div class="key"><b>Rôles</b> → Root / Designated / Alternate / Backup<br><b>États RSTP</b> → Discarding / Learning / Forwarding<br><b>Root bridge</b> → plus petite BID (priorité 32768 défaut + MAC)<br><b>BPDU guard</b> → désactive port si BPDU reçu (edge ports)<br><b>Root guard</b> → empêche un port de devenir root port</div>
+      <div class="tags"><span class="tag">STP</span><span class="tag">RSTP</span><span class="tag">MSTP</span><span class="tag">VSTP</span><span class="tag">Root bridge</span><span class="tag">Port roles</span><span class="tag">Guards</span></div>
+      <div class="key"><b>But</b> → éviter boucles L2 en bloquant certains chemins redondants<br><b>Root bridge</b> → plus petite Bridge ID = priority + MAC ; priorité défaut souvent 32768<br><b>Roles</b> → Root port vers root ; Designated port vers segment ; Alternate backup ; Backup rare<br><b>RSTP states</b> → Discarding / Learning / Forwarding ; convergence plus rapide que STP<br><b>MSTP</b> → mappe plusieurs VLANs vers instances STP ; scalable<br><b>VSTP</b> → une instance par VLAN<br><b>Protection</b> → BPDU guard sur edge ; Root guard empêche root inattendu ; Loop guard protège perte de BPDU</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c7" id="jncis-7">
-  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">07</span><span class="name">MPLS</span><span class="arrow">›</span></div>
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">07</span><span class="name">MPLS Fundamentals</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">Labels</span><span class="tag">LDP</span><span class="tag">RSVP</span><span class="tag">Push/Pop/Swap</span><span class="tag">inet.3</span><span class="tag">PHP</span><span class="tag">Segment Routing</span></div>
-      <div class="key"><b>Label</b> → 20 bits label | 3 bits TC | 1 bit S (bottom of stack) | 8 bits TTL<br><b>LDP</b> → distribue labels basé sur IGP, hop-by-hop<br><b>RSVP</b> → LSP avec réservation bande passante, path explicite<br><b>inet.3</b> → table des LSPs (utilisée par BGP pour résoudre NEXT_HOP)<br><b>PHP</b> → Penultimate Hop Popping — avant-dernier router enlève le label<br><b>SR</b> → Segment Routing — SID remplace labels LDP/RSVP</div>
+      <div class="tags"><span class="tag">Label stack</span><span class="tag">Push / Swap / Pop</span><span class="tag">FEC</span><span class="tag">LER / LSR</span><span class="tag">LFIB</span><span class="tag">mpls.0</span><span class="tag">inet.3</span><span class="tag">PHP</span></div>
+      <div class="key"><b>Label format</b> → 20-bit Label | 3-bit TC/EXP | S bottom-of-stack | TTL<br><b>FEC</b> → Forwarding Equivalence Class : trafic traité de la même façon<br><b>Actions</b> → PUSH à l’entrée ; SWAP dans le core ; POP à la sortie/PHP<br><b>LER</b> → PE ingress/egress ; <b>LSR</b> → P router qui commute les labels<br><b>LFIB/mpls.0</b> → incoming label → action → outgoing label/interface<br><b>inet.3</b> → table Junos des chemins LSP vers next-hop BGP/PE ; souvent utilisée pour résoudre VPN next-hop<br><b>PHP</b> → avant-dernier routeur retire le transport label si egress annonce implicit-null<br><b>Mémo</b> → IGP choisit le chemin ; signalisation fournit labels ; P routers regardent seulement outer label</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c8" id="jncis-8">
-  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">08</span><span class="name">IPv6</span><span class="arrow">›</span></div>
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">08</span><span class="name">LDP</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">128 bits</span><span class="tag">NDP</span><span class="tag">SLAAC</span><span class="tag">OSPFv3</span><span class="tag">IS-IS dual-stack</span><span class="tag">Tunneling</span></div>
-      <div class="key"><b>Link-local</b> → FE80::/10 — auto-configurée, non routable<br><b>NDP</b> → Neighbor Discovery Protocol (remplace ARP)<br><b>SLAAC</b> → auto-config sans DHCP (prefix /64 + EUI-64)<br><b>Tunneling</b> → 6in4, 6to4, GRE IPv6-over-IPv4</div>
+      <div class="tags"><span class="tag">Discovery</span><span class="tag">TCP 646</span><span class="tag">UDP 646</span><span class="tag">Label bindings</span><span class="tag">Downstream unsolicited</span><span class="tag">LDP follows IGP</span><span class="tag">Full mesh LSP</span></div>
+      <div class="key"><b>Rôle</b> → distribuer automatiquement des labels pour les FEC IGP ; crée des LSP hop-by-hop<br><b>Discovery</b> → Hello UDP 646 vers 224.0.0.2 ; session TCP 646 entre LDP peers<br><b>Downstream unsolicited</b> → le routeur downstream annonce spontanément le label à utiliser pour un FEC<br><b>Labels locaux</b> → chaque routeur choisit ses labels ; label significance locale uniquement<br><b>Forwarding</b> → R2 reçoit label X → swap vers label Y annoncé par son next-hop IGP<br><b>Full mesh</b> → LDP + IGP donne connectivité label-switched entre loopbacks MPLS sans config de tunnel manuel<br><b>Piège</b> → LDP ne fait pas TE/bandwidth ; il suit le shortest path IGP<br><b>Show</b> → show ldp neighbor ; show ldp database ; show route table inet.3 ; show route table mpls.0</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c9" id="jncis-9">
-  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">09</span><span class="name">Tunnels (GRE)</span><span class="arrow">›</span></div>
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">09</span><span class="name">RSVP-TE</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">GRE IP Protocol 47</span><span class="tag">Encapsulation</span><span class="tag">MTU overhead 24B</span><span class="tag">gr- interface</span></div>
-      <div class="key"><b>GRE</b> → Outer IP Header + GRE Header (4B) + Original Packet<br><b>MTU</b> → overhead = 24 bytes (attention fragmentation)<br><b>Config</b> → interfaces gr-0/0/0.0 { tunnel { source X; destination Y } }<br><b>Usage</b> → transporter non-IP, bypass restrictions, VPN basique</div>
+      <div class="tags"><span class="tag">RSVP LSP</span><span class="tag">CSPF</span><span class="tag">Explicit path</span><span class="tag">Strict / Loose</span><span class="tag">Bandwidth</span><span class="tag">Setup/Hold priority</span><span class="tag">FRR</span><span class="tag">Admin-groups</span></div>
+      <div class="key"><b>Rôle</b> → créer des LSP avec contraintes : bande passante, chemin explicite, admin-groups, protection<br><b>CSPF</b> → calcule chemin en retirant liens qui ne respectent pas contraintes puis SPF<br><b>Explicit path</b> → strict hop = prochain saut exact ; loose hop = passer par ce noeud mais chemin libre entre deux<br><b>Bandwidth</b> → réserve capacité dans TED ; même si trafic réel inférieur, la bande est comptabilisée comme réservée<br><b>Priority</b> → setup priority pour prendre une ressource ; hold priority pour garder une ressource ; 0 = plus prioritaire, 7 = moins prioritaire<br><b>Preemption</b> → un LSP setup plus prioritaire peut préempter un LSP hold moins prioritaire<br><b>FRR</b> → local repair rapide ; link-protection protège lien ; node-protection protège noeud suivant<br><b>IGP TE</b> → OSPF nécessite traffic-engineering ; IS-IS TE plus naturel via TLVs</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
+
 
 <div class="card c10" id="jncis-10">
-  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">10</span><span class="name">High Availability</span><span class="arrow">›</span></div>
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">10</span><span class="name">MPLS VPNs / MP-BGP</span><span class="arrow">›</span></div>
   <div class="card-body">
     <div class="body-concepts">
-      <div class="tags"><span class="tag">LAG/MC-LAG</span><span class="tag">GRES</span><span class="tag">NSR/NSB</span><span class="tag">BFD</span><span class="tag">VRRP</span><span class="tag">Unified ISSU</span><span class="tag">Graceful restart</span></div>
-      <div class="key"><b>GRES</b> → bascule RE sans perdre forwarding states (PFE continue)<br><b>NSR</b> → protocoles continuent sans reconvergence après bascule RE<br><b>BFD</b> → détection panne en ms (remplace timers lents OSPF/BGP)<br><b>VRRP</b> → passerelle redondante — Master + Backup + Virtual IP<br><b>Unified ISSU</b> → upgrade software sans interruption de trafic</div>
+      <div class="tags"><span class="tag">PE / P / CE</span><span class="tag">VRF</span><span class="tag">RD</span><span class="tag">RT</span><span class="tag">VPNv4</span><span class="tag">Transport label</span><span class="tag">VPN label</span><span class="tag">Overlapping IPs</span></div>
+      <div class="key"><b>PE/P/CE</b> → CE client ; PE porte VRF ; P ne connaît pas les routes clients<br><b>VRF</b> → table de routage isolée par client sur PE<br><b>RD</b> → rend la route unique dans BGP : RD:IPv4 = VPNv4 ; ne décide pas l’import<br><b>RT</b> → extended community qui contrôle import/export des routes entre VRFs<br><b>MP-BGP</b> → échange VPNv4/VPNv6 entre PEs avec next-hop = loopback PE et VPN label<br><b>Deux labels</b> → outer transport label vers PE distant ; inner VPN label pour choisir la VRF/service à l’egress<br><b>Forwarding</b> → ingress PE lookup VRF → push transport+VPN labels → P swap outer → egress PE pop VPN vers bonne VRF<br><b>Overlapping IPs</b> → possible car RD rend routes uniques et VPN label/VRF distingue le dataplane</div>
     </div>
-    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+
+<div class="card c1" id="jncis-11">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">11</span><span class="name">IPv6</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">128 bits</span><span class="tag">Address types</span><span class="tag">Link-local</span><span class="tag">NDP</span><span class="tag">SLAAC</span><span class="tag">OSPFv3</span><span class="tag">IS-IS IPv6</span><span class="tag">MP-BGP</span></div>
+      <div class="key"><b>Address</b> → 128 bits ; notation hex ; /64 typique LAN<br><b>Link-local</b> → FE80::/10 ; obligatoire sur interface ; utilisé par protocoles/next-hop ; non routé<br><b>NDP</b> → remplace ARP avec ICMPv6 Neighbor Solicitation/Advertisement<br><b>SLAAC</b> → auto-config via Router Advertisement ; souvent /64<br><b>OSPFv3</b> → version OSPF pour IPv6 ; OSPFv2 = IPv4<br><b>IS-IS</b> → support IPv6 via TLVs, pas besoin d’un protocole séparé<br><b>BGP</b> → MP-BGP address-family inet6 unicast pour IPv6<br><b>Piège</b> → IGMP est IPv4 multicast ; MLD est IPv6 multicast</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+
+<div class="card c2" id="jncis-12">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">12</span><span class="name">Tunnels / GRE</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">GRE protocol 47</span><span class="tag">Encapsulation</span><span class="tag">MTU overhead</span><span class="tag">Path MTU</span><span class="tag">gr interface</span><span class="tag">Use cases</span></div>
+      <div class="key"><b>GRE</b> → encapsulation simple IP-over-IP ; protocole IP 47, pas TCP/UDP<br><b>Overhead</b> → outer IP 20B + GRE 4B = 24B minimum<br><b>MTU</b> → risque fragmentation si paquet + overhead dépasse MTU physique<br><b>PMTUD</b> → aide à découvrir MTU chemin et éviter blackhole fragmentation<br><b>Junos</b> → interface gr-* avec tunnel source/destination<br><b>Usage</b> → transporter protocoles/VRF/traffic via overlay ; pas de chiffrement natif<br><b>Piège exam</b> → GRE != IPsec ; si besoin sécurité, ajouter IPsec ou autre mécanisme</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
+  </div>
+</div>
+
+
+<div class="card c3" id="jncis-13">
+  <div class="card-hdr" onclick="toggleCard(this.parentElement)"><span class="num">13</span><span class="name">High Availability</span><span class="arrow">›</span></div>
+  <div class="card-body">
+    <div class="body-concepts">
+      <div class="tags"><span class="tag">BFD</span><span class="tag">VRRP</span><span class="tag">LAG / MC-LAG</span><span class="tag">GRES</span><span class="tag">NSR / NSB</span><span class="tag">Graceful restart</span><span class="tag">ISSU</span></div>
+      <div class="key"><b>BFD</b> → détection panne rapide en ms ; utilisé avec OSPF/IS-IS/BGP/static/RSVP<br><b>VRRP</b> → gateway redondante ; VIP partagée ; master = priorité la plus haute<br><b>LAG</b> → agrège liens ; LACP négocie ; hash par flow, pas forcément équilibrage parfait paquet par paquet<br><b>MC-LAG</b> → LAG vers deux chassis pour redondance active/active côté client<br><b>GRES</b> → bascule Routing Engine en gardant forwarding/PFE<br><b>NSR/NSB</b> → maintient sessions protocoles/bridging pendant switchover sans dépendre du voisin<br><b>Graceful Restart</b> → le voisin aide à préserver routes pendant redémarrage contrôle-plane<br><b>ISSU</b> → upgrade logiciel avec interruption minimale selon plateforme/support</div>
+    </div>
+    <div class="body-notes"><div class="notes-hdr" onclick="toggleNotes(this)"><span>+ Mes notes</span><span class="ni">›</span></div><div class="notes-content"><textarea class="notes-textarea" placeholder="Ajoute tes notes, configs, exemples, pièges exam..."></textarea><button class="save-btn" onclick="saveNote(this)">Sauvegarder</button><span class="saved-badge">✓ Sauvegardé</span><div class="status-row"><span>Statut :</span><select class="status-sel" onchange="saveStatus(this)"><option value="">⬜ Non commencé</option><option value="wip">🔄 En cours</option><option value="ok">✅ Maîtrisé</option><option value="review">❌ À revoir</option></select></div></div></div>
   </div>
 </div>
 
 </div>
-<div class="legend">Source : PDF officiel Juniper JNCIS-SP (JN0-363) — May 2022</div>
+<div class="legend">Structure enrichie pour révision JNCIS-SP : modules officiels + sous-chapitres MPLS/LDP/RSVP/VPN</div>
 </div>
 </div>
 
